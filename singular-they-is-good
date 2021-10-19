@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+if [ ! -f "$1" ] || [ -z $2 ]; then
+    echo "usage: $0 path/to/video.mkv <size in bytes>" >&2
+    exit 1
+fi
+
+mediainfo=$(which mediainfo 2>&1)
+if [ $? != 0 ]; then
+    echo "$0: error: mediainfo not installed or not in "'$PATH' >&2
+    exit 1
+fi
+
+bc=$(which bc 2>&1)
+if [ $? != 0 ]; then
+    echo "$0: error: bc not installed or not in "'$PATH' >&2
+    exit 1
+fi
+
+file="$1"
+duration=$(mediainfo --Inform='General;%Duration%' "$file")
+bytes=$2
+bitrate=$(bc -l <<< "$bytes * 8000 / $duration")
+echo $bitrate
